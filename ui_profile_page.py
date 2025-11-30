@@ -2,7 +2,7 @@
 import streamlit as st
 from typing import List, Callable
 from models import Member, ROLE_ORDER, ROLE_COLORS
-from repository import save_members  # or 受け取る
+
 
 
 def to_multiline(value: str) -> str:
