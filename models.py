@@ -1,13 +1,29 @@
 # models.py
-
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Literal
+
+# 元の役割（app.py にあったものをそのまま採用）
+Role = Literal["代表", "開発", "イベント企画", "SNS広報", "学び舎", "外部連携"]
+
+# 役割ごとの色（カード表示などに使える）
+ROLE_COLORS: dict[Role, str] = {
+    "代表": "ff99cc",
+    "開発": "66cc66",
+    "イベント企画": "ffeb66",
+    "SNS広報": "ff6666",
+    "学び舎": "6699ff",
+    "外部連携": "aaaaaa",
+}
+
+# 表示順
+ROLE_ORDER: list[Role] = ["代表", "開発", "イベント企画", "SNS広報", "学び舎", "外部連携"]
+
 
 @dataclass
 class Member:
     id: Optional[int] = None
     name: str = ""
-    role: Optional[str] = None
+    role: Optional[Role] = None
     grade: Optional[str] = None
     faculty: Optional[str] = None
     department_course: Optional[str] = None
