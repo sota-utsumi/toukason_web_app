@@ -7,35 +7,46 @@ from supabase import create_client, Client
 
 from models import Member
 
-TABLE_NAME = "menbers"  # Supabase のテーブル名（DDL の typo に合わせる）
+TABLE_NAME = "menbers"  # Supabase のテーブル名
 
 
 @st.cache_resource
 def get_supabase() -> Client:
-    """Supabase クライアント（Streamlit Cloud 用にキャッシュ）。"""
+    """Supabase クライアントを生成（Streamlit のリソースキャッシュ付き）"""
     url = st.secrets["supabase"]["url"]
     key = st.secrets["supabase"]["anon_key"]
-    return create_client(url, key)
+
+    # デバッグ用：URL を軽くチェック（必要なくなったら消してOK）
+    clean_url = url.strip()
+    if not clean_url.startswith("https://") or ".supabase.co" not in clean_url:
+        # ここでエラーを投げると、Cloud のログに URL の repr が出る
+        raise RuntimeError(f"Supabase URL looks wrong: {repr(clean_url)}")
+
+    return create_client(clean_url, key)
 
 
 def load_members() -> List[Member]:
     """
-    Supabase の public.menbers からメンバー一覧を取得して、
-    Member のリストとして返す。
+    Supabase から members をロード。
+    失敗したときは例外を投げるので、呼び出し側で try/except する。
     """
     supabase = get_supabase()
     res = supabase.table(TABLE_NAME).select("*").order("id").execute()
-    rows = res.data or []
 
-    members: List[Member] = [Member.from_dict(row) for row in rows]
+    rows = res.data or []
+    members: List[Member] = []
+
+    for row in rows:
+        # DB のカラムと Member のフィールド名は一致している前提
+        members.append(Member(**row))
+
     return members
 
 
 def save_members(members: List[Member]) -> None:
     """
-    渡された members を Supabase に保存する。
+    渡された members を Supabase に保存。
     - id を主キーとして upsert（あれば更新、なければ挿入）
-    - 削除同期は行わず、INSERT / UPDATE のみ
     """
     supabase = get_supabase()
 

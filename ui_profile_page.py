@@ -22,7 +22,7 @@ def from_multiline(value: str) -> str:
 def render_profile_page(
     members: List[Member],
     saver: Callable[[List[Member]], None],
-) -> None:
+    ) -> None:
     left, main, right = st.columns([0.3, 1.4, 0.3])
     with main:
         st.title("プロフィール作成・編集")
