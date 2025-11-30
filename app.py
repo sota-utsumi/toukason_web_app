@@ -3,10 +3,21 @@ from repository import load_members, save_members
 from ui_profile_page import render_profile_page
 from ui_member_list_page import render_member_list_page
 from ui_member_detail_page import render_member_detail_page
+from ui_mokumoku_page import render_mokumoku_page
 
-st.set_page_config(page_title="桃下村塾メンバー紹介", layout="wide")
+st.set_page_config(page_title="桃下村塾", layout="wide")
+st.title("桃下村塾")
 
-# --------- セッション状態の初期化 ---------
+# --------- セッション状態の初期化（★ここを一番最初にやる） ---------
+# 1) 画面の種類
+if "view" not in st.session_state:
+    st.session_state.view = "profile"  # "profile" / "list" / "detail" / "mokumoku"
+
+# 2) 詳細ページで見るメンバーID
+if "detail_member_id" not in st.session_state:
+    st.session_state.detail_member_id = None
+
+# 3) メンバー一覧（Supabase からロード）
 if "members" not in st.session_state:
     try:
         st.session_state.members = load_members()
@@ -18,18 +29,12 @@ if "members" not in st.session_state:
         )
         st.session_state.members = []
 
-# view: "profile" | "list" | "detail"
-if "view" not in st.session_state:
-    st.session_state.view = "profile"
-
-if "detail_member_id" not in st.session_state:
-    st.session_state.detail_member_id = None
-
 members = st.session_state.members
 
-# --------- サイドバー（ラジオやめてボタンだけ） ---------
-st.sidebar.title("桃下村塾")
+# --------- サイドバー ---------
+st.sidebar.title("メニュー")
 
+# プロフィール
 if st.sidebar.button(
     "プロフィール作成・編集",
     type="primary" if st.session_state.view == "profile" else "secondary",
@@ -38,6 +43,7 @@ if st.sidebar.button(
     st.session_state.detail_member_id = None
     st.rerun()
 
+# メンバー一覧
 if st.sidebar.button(
     "メンバー一覧",
     type="primary" if st.session_state.view == "list" else "secondary",
@@ -46,8 +52,14 @@ if st.sidebar.button(
     st.session_state.detail_member_id = None
     st.rerun()
 
-st.title("桃下村塾メンバー紹介")
-st.markdown("---")
+# もくもく会
+if st.sidebar.button(
+    "もくもく会",
+    type="primary" if st.session_state.view == "mokumoku" else "secondary",
+):
+    st.session_state.view = "mokumoku"
+    st.session_state.detail_member_id = None
+    st.rerun()
 
 # --------- ルーティング ---------
 if st.session_state.view == "detail" and st.session_state.detail_member_id is not None:
@@ -63,8 +75,10 @@ if st.session_state.view == "detail" and st.session_state.detail_member_id is no
         render_member_detail_page(target)
 
 else:
-    # 一覧 or プロフィール
+    # プロフィール / 一覧 / もくもく会
     if st.session_state.view == "profile":
         render_profile_page(members, save_members)
-    else:  # "list"
+    elif st.session_state.view == "list":
         render_member_list_page(members, save_members)
+    elif st.session_state.view == "mokumoku":
+        render_mokumoku_page(members, save_members)

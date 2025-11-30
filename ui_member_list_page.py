@@ -1,8 +1,6 @@
 # ui_member_list_page.py
 from typing import List, Callable
-
 import streamlit as st
-
 from models import Member, ROLE_ORDER, ROLE_COLORS
 
 
