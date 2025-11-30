@@ -4,6 +4,7 @@ from ui_profile_page import render_profile_page
 from ui_member_list_page import render_member_list_page
 from ui_member_detail_page import render_member_detail_page
 from ui_mokumoku_page import render_mokumoku_page
+from ui_idea_page import render_idea_page
 
 st.set_page_config(page_title="桃下村塾", layout="wide")
 st.title("桃下村塾")
@@ -11,7 +12,7 @@ st.title("桃下村塾")
 # --------- セッション状態の初期化（★ここを一番最初にやる） ---------
 # 1) 画面の種類
 if "view" not in st.session_state:
-    st.session_state.view = "profile"  # "profile" / "list" / "detail" / "mokumoku"
+    st.session_state.view = "profile"  # "profile" / "list" / "detail" / "mokumoku"/"idea"
 
 # 2) 詳細ページで見るメンバーID
 if "detail_member_id" not in st.session_state:
@@ -60,6 +61,15 @@ if st.sidebar.button(
     st.session_state.view = "mokumoku"
     st.session_state.detail_member_id = None
     st.rerun()
+    
+# アイデア
+if st.sidebar.button(
+    "アイデア",
+    type="primary" if st.session_state.view == "idea" else "secondary",
+):
+    st.session_state.view = "idea"
+    st.session_state.detail_member_id = None
+    st.rerun()
 
 # --------- ルーティング ---------
 if st.session_state.view == "detail" and st.session_state.detail_member_id is not None:
@@ -75,10 +85,12 @@ if st.session_state.view == "detail" and st.session_state.detail_member_id is no
         render_member_detail_page(target)
 
 else:
-    # プロフィール / 一覧 / もくもく会
+    # プロフィール / 一覧 / もくもく会 / アイデア
     if st.session_state.view == "profile":
         render_profile_page(members, save_members)
     elif st.session_state.view == "list":
         render_member_list_page(members, save_members)
     elif st.session_state.view == "mokumoku":
         render_mokumoku_page(members, save_members)
+    elif st.session_state.view == "idea":
+        render_idea_page()
