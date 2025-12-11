@@ -5,6 +5,7 @@ from ui_member_list_page import render_member_list_page
 from ui_member_detail_page import render_member_detail_page
 from ui_mokumoku_page import render_mokumoku_page
 from ui_idea_page import render_idea_page
+from ui_survey_page import render_survey_page
 
 st.set_page_config(page_title="桃下村塾", layout="wide")
 st.title("桃下村塾")
@@ -12,7 +13,8 @@ st.title("桃下村塾")
 # --------- セッション状態の初期化（★ここを一番最初にやる） ---------
 # 1) 画面の種類
 if "view" not in st.session_state:
-    st.session_state.view = "profile"  # "profile" / "list" / "detail" / "mokumoku"/"idea"
+    # "profile" / "list" / "detail" / "mokumoku" / "idea" / "survey"
+    st.session_state.view = "profile"
 
 # 2) 詳細ページで見るメンバーID
 if "detail_member_id" not in st.session_state:
@@ -71,6 +73,15 @@ if st.sidebar.button(
     st.session_state.detail_member_id = None
     st.rerun()
 
+# アンケート
+if st.sidebar.button(
+    "アンケート",
+    type="primary" if st.session_state.view == "survey" else "secondary",
+):
+    st.session_state.view = "survey"
+    st.session_state.detail_member_id = None
+    st.rerun()
+
 # --------- ルーティング ---------
 if st.session_state.view == "detail" and st.session_state.detail_member_id is not None:
     # 詳細ページ
@@ -94,3 +105,5 @@ else:
         render_mokumoku_page(members, save_members)
     elif st.session_state.view == "idea":
         render_idea_page()
+    elif st.session_state.view == "survey":
+        render_survey_page()
